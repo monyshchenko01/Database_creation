@@ -1,0 +1,429 @@
+CREATE database UKLON;
+use uklon;
+drop database uklon;
+
+-- 1
+CREATE TABLE Cities (
+   city_id INT AUTO_INCREMENT PRIMARY KEY,
+   name VARCHAR(50) NOT NULL,
+oblast varchar(255)
+);
+
+ALTER TABLE Cities
+COMMENT = 'Table to store cities information';
+
+ALTER TABLE Cities
+MODIFY COLUMN city_id INT AUTO_INCREMENT COMMENT 'Unique identifier for some tables',
+MODIFY COLUMN name VARCHAR(50) COMMENT 'Name of region',
+MODIFY COLUMN oblast VARCHAR(255) COMMENT 'Name of oblast in Ukrain';
+
+
+-- 2
+CREATE TABLE Customers (
+   customer_id VARCHAR(36) PRIMARY KEY,
+   first_name VARCHAR(20) NOT NULL,
+   last_name VARCHAR(20) NOT NULL,
+   email VARCHAR(100) NOT NULL UNIQUE,
+   phone VARCHAR(100) NOT NULL UNIQUE,
+   password VARCHAR(100) NOT NULL,
+   city_id INT,
+   created_at DATE,
+   FOREIGN KEY (city_id) REFERENCES Cities(city_id)
+);
+
+ALTER TABLE Customers
+COMMENT = 'Table to store Customers information';
+
+ALTER TABLE Customers
+MODIFY COLUMN customer_id VARCHAR(36) COMMENT 'Unique identifier for each schedule entry',
+MODIFY COLUMN first_name VARCHAR(20) COMMENT 'Name of user',
+MODIFY COLUMN last_name VARCHAR(20) COMMENT 'Surname of user',
+MODIFY COLUMN email VARCHAR(100) COMMENT 'Email of each users in this app',
+MODIFY COLUMN phone VARCHAR(100) COMMENT 'phone number of each customers',
+MODIFY COLUMN password VARCHAR(100) COMMENT 'charecter set for logging into the application',
+MODIFY COLUMN city_id INT COMMENT 'Identifier for the cities',
+MODIFY COLUMN created_at DATE COMMENT 'Data of creating account in this app';
+
+
+-- 3
+CREATE TABLE Cars (
+   car_id INT AUTO_INCREMENT PRIMARY KEY,
+   car_number VARCHAR(10),
+   car_brend varchar(30),
+   car_model VARCHAR(30),
+   license_plate VARCHAR(20) UNIQUE,
+   color VARCHAR(20),
+   car_type VARCHAR (20),
+   year_produced INT(5)
+);
+
+ALTER TABLE Cars
+COMMENT = 'Table to store cars information';
+
+ALTER TABLE Cars
+MODIFY COLUMN car_id INT AUTO_INCREMENT COMMENT 'Unique identifier for each schedule entry',
+MODIFY COLUMN car_number VARCHAR(10) COMMENT 'Charecter set of each cars numbers',
+MODIFY COLUMN car_brend VARCHAR(30) COMMENT 'Brend of each car helps to indentify where the car was produced',
+MODIFY COLUMN car_model VARCHAR(30) COMMENT 'Charectar set for indentifying a type car',
+MODIFY COLUMN license_plate VARCHAR(20) COMMENT 'Lincense gives the right to transport passengers by cars',
+MODIFY COLUMN color VARCHAR(20) COMMENT 'color of each cars',
+MODIFY COLUMN car_type VARCHAR(20) COMMENT 'Type of car which can be chosen by cutomers',
+MODIFY COLUMN year_produced INT(5) COMMENT 'Year which can help to indetify when the car was produced';
+
+-- 4
+CREATE TABLE Drivers (
+   driver_id VARCHAR(36) PRIMARY KEY,
+   first_name VARCHAR(100) NOT NULL,
+   last_name VARCHAR(100) NOT NULL,
+   phone VARCHAR(100) NOT NULL UNIQUE,
+   email VARCHAR(100) NOT NULL UNIQUE,
+   license_number VARCHAR(20) NOT NULL UNIQUE,
+   car_id INT,
+   city_id INT,
+   password VARCHAR(100) NOT null,
+   created_at DATE,
+   FOREIGN KEY (car_id) REFERENCES Cars(car_id),
+   FOREIGN KEY (city_id) REFERENCES Cities(city_id)
+);
+
+ALTER TABLE Drivers
+COMMENT = 'Table to store drivers information';
+
+ALTER TABLE Drivers
+MODIFY COLUMN driver_id VARCHAR(36) COMMENT 'Unique identifier for each drivers',
+MODIFY COLUMN first_name VARCHAR(100) COMMENT 'Name of driver',
+MODIFY COLUMN last_name VARCHAR(100) COMMENT 'Surname of driver',
+MODIFY COLUMN phone VARCHAR(100) COMMENT 'Phone number of drivers',
+MODIFY COLUMN email VARCHAR(100) COMMENT 'Email of each drivers who are in this app',
+MODIFY COLUMN license_number VARCHAR(20) COMMENT 'Lincense gives the right to transport passengers',
+MODIFY COLUMN car_id INT COMMENT 'Identifier for the cars',
+MODIFY COLUMN city_id INT COMMENT 'Identifier for the cities',
+MODIFY COLUMN password VARCHAR(100) COMMENT 'Charecter set for logging into the application',
+MODIFY COLUMN created_at DATE COMMENT 'Date of creating drivers account';
+
+
+-- 5
+CREATE TABLE Rides (
+   ride_id VARCHAR(36) PRIMARY KEY,
+   customer_id VARCHAR(36) NOT NULL,
+   driver_id VARCHAR(36),
+   pickup_location VARCHAR(255),
+   pickup_city_id INT,
+   dropoff_location VARCHAR(255),
+   dropoff_city_id INT,
+   status VARCHAR(20),
+   requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   completed_at TIMESTAMP,
+   FOREIGN KEY (customer_id) REFERENCES Customers(customer_id),
+   FOREIGN KEY (driver_id) REFERENCES Drivers(driver_id),
+   FOREIGN KEY (pickup_city_id) REFERENCES Cities(city_id),
+   FOREIGN KEY (dropoff_city_id) REFERENCES Cities(city_id)
+);
+
+
+ALTER TABLE Rides
+COMMENT = 'Table to store rides information';
+
+ALTER TABLE Rides
+MODIFY COLUMN ride_id VARCHAR(36) COMMENT 'Unique identifier for rides',
+MODIFY COLUMN customer_id VARCHAR(36) COMMENT 'Indentifier for the customers',
+MODIFY COLUMN driver_id VARCHAR(36) COMMENT 'Indentifier for the drivers',
+MODIFY COLUMN pickup_location VARCHAR(225) COMMENT 'It is location where driver took passenger',
+MODIFY COLUMN pickup_city_id INT COMMENT 'Indentifier for the cities',
+MODIFY COLUMN dropoff_location VARCHAR(255) COMMENT 'It is location where passenger was dropped off',
+MODIFY COLUMN dropoff_city_id INT COMMENT 'Identifier for the cities',
+MODIFY COLUMN status VARCHAR(20) COMMENT 'Indicates whether ride is active or not',
+MODIFY COLUMN requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Indicates when ride is requested',
+MODIFY COLUMN completed_at TIMESTAMP COMMENT 'Indicates when ride is completed';
+
+-- 6
+CREATE TABLE Payments (
+   payment_id VARCHAR(36) PRIMARY KEY,
+   ride_id VARCHAR(36) NOT NULL,
+   amount DECIMAL(10, 2) NOT NULL,
+   payment_method VARCHAR(50),
+   card_number VARCHAR(20),
+   paid_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   FOREIGN KEY (ride_id) REFERENCES Rides(ride_id)
+);
+
+ALTER TABLE Payments
+COMMENT = 'Table to store payments information';
+
+ALTER TABLE Payments
+MODIFY COLUMN payment_id VARCHAR(36) COMMENT 'Unique identifier for payments',
+MODIFY COLUMN ride_id VARCHAR(36) COMMENT 'Indentifier for the rides',
+MODIFY COLUMN amount DECIMAL(10, 2) COMMENT 'Indicates how much ride is cost',
+MODIFY COLUMN payment_method VARCHAR(50) COMMENT 'Indicates which method for payment was chosen by passenger',
+MODIFY COLUMN card_number VARCHAR(20) COMMENT 'It is a number of passenger card for payment',
+MODIFY COLUMN paid_at TIMESTAMP COMMENT 'Shows when passenger paid for a ride';
+
+-- 7
+CREATE TABLE Reviews (
+   review_id VARCHAR(36) PRIMARY KEY,
+   ride_id VARCHAR(36) NOT NULL,
+   user_id VARCHAR(36) NOT NULL,
+   driver_id VARCHAR(36) NOT NULL,
+   rating INT CHECK (rating >= 1 AND rating <= 5),
+   comment TEXT,
+   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   FOREIGN KEY (ride_id) REFERENCES Rides(ride_id),
+   FOREIGN KEY (user_id) REFERENCES Customers(customer_id),
+   FOREIGN KEY (driver_id) REFERENCES Drivers(driver_id)
+);
+
+ALTER TABLE Reviews
+COMMENT = 'Table to store reviews information';
+
+ALTER TABLE Reviews
+MODIFY COLUMN review_id VARCHAR(36) COMMENT 'Unique identifier for reviews',
+MODIFY COLUMN ride_id VARCHAR(36) COMMENT 'Indentifier for the rides',
+MODIFY COLUMN user_id VARCHAR(36) COMMENT 'Indentifier for the customers',
+MODIFY COLUMN driver_id VARCHAR(36) COMMENT 'Indentifier for the drivers',
+MODIFY COLUMN rating INT COMMENT 'Rating of all drivers for checking by passengers',
+MODIFY COLUMN comment TEXT COMMENT 'Comment can be left by passengers for rating',
+MODIFY COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  COMMENT 'Shows when review was written';
+
+-- 8
+CREATE TABLE Couriers (
+   courier_id VARCHAR(36) PRIMARY KEY,
+   first_name VARCHAR(100) NOT NULL,
+   last_name VARCHAR(100) NOT null,
+   phone VARCHAR(100) NOT NULL UNIQUE,
+   email VARCHAR(100) NOT NULL UNIQUE,
+   city_id INT,
+   car_id INT,
+   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   FOREIGN KEY (city_id) REFERENCES Cities(city_id),
+   FOREIGN KEY (car_id) REFERENCES Cars(car_id)
+);
+
+ALTER TABLE Couriers
+COMMENT = 'Table to store information about couriers';
+
+ALTER TABLE Couriers
+MODIFY COLUMN courier_id VARCHAR(36) COMMENT 'Unique identifier for couriers',
+MODIFY COLUMN first_name VARCHAR(100) COMMENT 'Name of all couriers',
+MODIFY COLUMN last_name VARCHAR(100) COMMENT 'Surname of all couriers',
+MODIFY COLUMN phone VARCHAR(100) COMMENT 'Shows a phone number of all couriers',
+MODIFY COLUMN email VARCHAR(100) COMMENT 'Email of each couriers who are in this app',
+MODIFY COLUMN city_id INT COMMENT 'Identifier for the cities',
+MODIFY COLUMN car_id INT COMMENT 'Identifier for the cars',
+MODIFY COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Indicates when courier account was created';
+
+-- 9
+CREATE TABLE Deliveries (
+   delivery_id VARCHAR(36) PRIMARY KEY,
+   customer_id VARCHAR(36) NOT NULL,
+   courier_id VARCHAR(36),
+   pickup_location VARCHAR(255),
+   pickup_city_id INT,
+   dropoff_location VARCHAR(255),
+   dropoff_city_id INT,
+   status VARCHAR(20),
+   requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   completed_at TIMESTAMP,
+   FOREIGN KEY (customer_id) REFERENCES Customers(customer_id),
+   FOREIGN KEY (courier_id) REFERENCES Couriers(courier_id),
+   FOREIGN KEY (pickup_city_id) REFERENCES Cities(city_id),
+   FOREIGN KEY (dropoff_city_id) REFERENCES Cities(city_id)
+);
+
+ALTER TABLE Deliveries
+COMMENT = 'Table to store deliveries information';
+
+ALTER TABLE Deliveries
+MODIFY COLUMN delivery_id VARCHAR(36) COMMENT 'Unique identifier for deliveries',
+MODIFY COLUMN customer_id VARCHAR(36) COMMENT 'Indentifier for the customers',
+MODIFY COLUMN courier_id VARCHAR(36) COMMENT 'Indentifier for the couriers',
+MODIFY COLUMN pickup_location VARCHAR(255) COMMENT 'Indicates where delivery was taken',
+MODIFY COLUMN pickup_city_id INT COMMENT 'Indetifier for the cities',
+MODIFY COLUMN dropoff_location VARCHAR(255) COMMENT 'Tells where delivery was given',
+MODIFY COLUMN dropoff_city_id INT COMMENT 'Identifier for the cities',
+MODIFY COLUMN status VARCHAR(20) COMMENT 'Indicates whether delivery is on going or not',
+MODIFY COLUMN requested_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Indicates when delivery is ordered',
+MODIFY COLUMN completed_at TIMESTAMP COMMENT 'Indicates when delivery is delivered';
+
+-- 10
+CREATE TABLE Shifts (
+   shift_id VARCHAR(36) PRIMARY KEY,
+   driver_id VARCHAR(36),
+   courier_id VARCHAR(36),
+   start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   end_time TIMESTAMP,
+   FOREIGN KEY (driver_id) REFERENCES Drivers(driver_id),
+   FOREIGN KEY (courier_id) REFERENCES Couriers(courier_id)
+);
+
+ALTER TABLE Shifts
+COMMENT = 'Table to store shifts information';
+
+ALTER TABLE Shifts
+MODIFY COLUMN shift_id VARCHAR(36) COMMENT 'Unique identifier for shifts',
+MODIFY COLUMN driver_id VARCHAR(36) COMMENT 'Indentifier for the drivers',
+MODIFY COLUMN courier_id VARCHAR(36) COMMENT 'Indentifier for the couriers',
+MODIFY COLUMN start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Indicates when driver shift is begun',
+MODIFY COLUMN end_time TIMESTAMP COMMENT 'Shows when driver shift is ended';
+
+-- 11
+CREATE TABLE Donations (
+   donation_id VARCHAR(36) PRIMARY KEY,
+   customer_id VARCHAR(36) NOT NULL,
+   amount DECIMAL(10, 2) NOT NULL,
+   payment_method VARCHAR(50),
+   card_number VARCHAR(100),
+   comment TEXT,
+   donated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   FOREIGN KEY (customer_id) REFERENCES Customers(customer_id)
+);
+
+ALTER TABLE Donations
+COMMENT = 'Table to store infromation about donations to army';
+
+ALTER TABLE Donations
+MODIFY COLUMN donation_id VARCHAR(36) COMMENT 'Unique identifier for each donation',
+MODIFY COLUMN customer_id VARCHAR(36) NOT NULL COMMENT 'ID of the user who made the donation',
+MODIFY COLUMN amount DECIMAL(10, 2) NOT NULL COMMENT 'Amount of the donation',
+MODIFY COLUMN payment_method VARCHAR(50) COMMENT 'Method of payment (e.g., Credit Card, PayPal)',
+MODIFY COLUMN card_number VARCHAR(100) COMMENT 'Credit card number used for the donation',
+MODIFY COLUMN comment TEXT COMMENT 'Additional comments or notes about the donation',
+MODIFY COLUMN donated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Timestamp of when the donation was made';
+
+CREATE OR REPLACE VIEW RidesInfo AS
+SELECT
+   r.ride_id AS RideID,
+   r.status AS RideStatus,
+   r.requested_at AS RideRequestedAt,
+   r.completed_at AS RideCompletedAt,
+   r.pickup_location AS RidePickupLocation,
+   r.dropoff_location AS RideDropoffLocation,
+   c.customer_id AS CustomerID,
+   c.first_name AS CustomerFirstName,
+   c.last_name AS CustomerLastName,
+   c.email AS CustomerEmail,
+   c.phone AS CustomerPhone,
+   d.driver_id AS DriverID,
+  	d.first_name AS DriverFirstName,
+   d.last_name AS DriverLastName,
+   d.email AS DriverEmail,
+   d.phone AS DriverPhone,
+   Cars.car_id AS CarID,
+   Cars.car_number AS CarNumber,
+   Cars.car_brend AS CarBrand,
+   Cars.car_model AS CarModel,
+   Cars.color AS CarColor,
+   PickupCity.name AS PickupCityName,
+   DropoffCity.name AS DropoffCityName
+FROM Rides r
+JOIN Customers c ON r.customer_id = c.customer_id
+JOIN Drivers d ON r.driver_id = d.driver_id
+JOIN Cars ON d.car_id = Cars.car_id
+JOIN Cities AS PickupCity ON r.pickup_city_id = PickupCity.city_id
+JOIN Cities AS DropoffCity ON r.dropoff_city_id = DropoffCity.city_id;
+
+SELECT * from ridesinfo;
+
+-- Функція яка рахує загальну суму донатів за весь час
+drop function TotalDonations;
+CREATE FUNCTION TotalDonations()
+RETURNS DECIMAL(10, 2)
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    DECLARE total DECIMAL(10, 2);
+    
+    SELECT SUM(amount) INTO total FROM Donations;
+    
+    RETURN total;
+END;
+
+SELECT TotalDonations() AS total_donations;
+
+-- Процедура яка шукає користувача за email
+drop procedure GetCustomerByEmail;
+
+CREATE PROCEDURE GetCustomerByEmail(IN customer_email VARCHAR(100))
+BEGIN
+    SELECT * FROM Customers WHERE email = customer_email;
+END;
+
+CALL GetCustomerByEmail('juliehiggins@example.com');
+
+
+explain analyze SELECT
+   r.ride_id AS RideID,
+   r.status AS RideStatus,
+   r.requested_at AS RideRequestedAt,
+   r.completed_at AS RideCompletedAt,
+   r.pickup_location AS RidePickupLocation,
+   r.dropoff_location AS RideDropoffLocation,
+   c.customer_id AS CustomerID,
+   c.first_name AS CustomerFirstName,
+   c.last_name AS CustomerLastName,
+   c.email AS CustomerEmail,
+   c.phone AS CustomerPhone,
+   d.driver_id AS DriverID,
+  	d.first_name AS DriverFirstName,
+   d.last_name AS DriverLastName,
+   d.email AS DriverEmail,
+   d.phone AS DriverPhone,
+   Cars.car_id AS CarID,
+   Cars.car_number AS CarNumber,
+   Cars.car_brend AS CarBrand,
+   Cars.car_model AS CarModel,
+   Cars.color AS CarColor,
+   PickupCity.name AS PickupCityName,
+   DropoffCity.name AS DropoffCityName
+FROM Rides r
+JOIN Customers c ON r.customer_id = c.customer_id
+JOIN Drivers d ON r.driver_id = d.driver_id
+JOIN Cars ON d.car_id = Cars.car_id
+JOIN Cities AS PickupCity ON r.pickup_city_id = PickupCity.city_id
+JOIN Cities AS DropoffCity ON r.dropoff_city_id = DropoffCity.city_id;
+
+CREATE INDEX idx_rides_customer_id ON Rides(customer_id);
+CREATE INDEX idx_rides_driver_id ON Rides(driver_id);
+CREATE INDEX idx_drivers_car_id ON Drivers(car_id);
+CREATE INDEX idx_rides_pickup_city_id ON Rides(pickup_city_id);
+CREATE INDEX idx_rides_dropoff_city_id ON Rides(dropoff_city_id);
+
+-- Users
+
+-- Customers
+CREATE USER 'customer_user'@'localhost' IDENTIFIED BY 'CustomerPass123';
+
+-- Driver
+CREATE USER 'driver_user'@'localhost' IDENTIFIED BY 'DriverPass123';
+
+-- Courier
+CREATE USER 'courier_user'@'localhost' IDENTIFIED BY 'CourierPass123';
+
+
+-- Надання прав доступу пасажиру
+GRANT SELECT ON uklon.Customers TO 'customer_user'@'localhost';
+GRANT SELECT ON uklon.Rides TO 'customer_user'@'localhost';
+GRANT SELECT ON uklon.Cars TO 'customer_user'@'localhost';
+
+
+-- Надання прав доступу водію
+GRANT SELECT ON uklon.Drivers TO 'driver_user'@'localhost';
+GRANT SELECT ON uklon.Cars TO 'driver_user'@'localhost';
+GRANT SELECT ON uklon.Rides TO 'driver_user'@'localhost';
+
+
+-- Надання прав доступу кур'єру
+GRANT SELECT ON uklon.Couriers TO 'courier_user'@'localhost';
+GRANT SELECT ON uklon.Deliveries TO 'courier_user'@'localhost';
+
+
+-- Перевірка прав доступу 
+SHOW GRANTS FOR 'customer_user'@'localhost';
+
+SHOW GRANTS FOR 'driver_user'@'localhost';
+
+SHOW GRANTS FOR 'courier_user'@'localhost';
+
+
+
+
+
